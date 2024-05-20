@@ -1,0 +1,41 @@
+name: openresty_geo_balancer_with_active_healthchecks
+
+services:
+  geo_balancer:
+    env_file:
+      - .env
+    build:
+      context: geo_balancer/
+      args:
+        ACCOUNT_ID: $ACCOUNT_ID
+        LICENSE_KEY: $LICENSE_KEY
+    command: "nginx -g 'daemon off;'"
+    ports:
+      - "80:80"
+
+  # Sample production servers
+  uk_server: &production_server
+    image: nginx:alpine
+    container_name: uk_server
+    volumes:
+      - ./example_templates/uk.index.html:/usr/share/nginx/html/index.html
+  us_server_1:
+    <<: *production_server
+    container_name: us_server_1
+    volumes:
+      - ./example_templates/us_1.index.html:/usr/share/nginx/html/index.html
+  us_server_2:
+    <<: *production_server
+    container_name: us_server_2
+    volumes:
+      - ./example_templates/us_2.index.html:/usr/share/nginx/html/index.html
+  rest_world_server:
+    <<: *production_server
+    container_name: rest_world_server
+    volumes:
+      - ./example_templates/rest_world.index.html:/usr/share/nginx/html/index.html
+  backup_server:
+    <<: *production_server
+    container_name: backup_server
+    volumes:
+      - ./example_templates/backup.index.html:/usr/share/nginx/html/index.html
